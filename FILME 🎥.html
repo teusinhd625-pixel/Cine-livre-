@@ -1,0 +1,338 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>CineLivre — Filmes para assistir</title>
+<style>
+:root{--bg:#090b12;--panel:#141824;--muted:#aab2c3;--red:#e50914;--line:#252c3c}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:#fff;font:15px/1.45 system-ui,-apple-system,Segoe UI,Roboto,Arial}
+header{position:sticky;top:0;z-index:5;background:#090b12ed;border-bottom:1px solid var(--line);backdrop-filter:blur(12px)}
+.nav{max-width:1100px;margin:auto;padding:14px 18px;display:flex;align-items:center;gap:18px}
+.logo{font-size:22px;font-weight:900;letter-spacing:-1px;color:#fff;white-space:nowrap}.logo span{color:var(--red)}
+.search{margin-left:auto;display:flex;gap:8px;max-width:390px;width:100%}input{width:100%;background:#171d2b;border:1px solid #30394d;color:white;border-radius:10px;padding:11px 13px;outline:none}input:focus{border-color:#e50914}
+main{max-width:1100px;margin:auto;padding:22px 18px 60px}
+.hero{min-height:280px;border-radius:18px;padding:30px;display:flex;align-items:end;background:linear-gradient(90deg,#080a10 0%,#080a10d9 40%,#080a1040 100%),radial-gradient(circle at 78% 25%,#9c273a 0,#44203d 23%,#18243c 48%,#101522 75%);overflow:hidden}
+.hero-content{max-width:560px}.eyebrow{color:#ff6b75;font-weight:800;text-transform:uppercase;letter-spacing:2px;font-size:11px}
+h1{font-size:clamp(32px,6vw,54px);line-height:1.02;margin:10px 0}.hero p{color:#d0d5df;max-width:480px}
+button{border:0;border-radius:9px;padding:11px 16px;background:var(--red);color:white;font-weight:750;cursor:pointer}button.secondary{background:#293144}button:hover{filter:brightness(1.13)}
+.actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:18px}
+.filters{display:flex;gap:8px;overflow:auto;padding:22px 0 8px}.chip{background:#171d2b;border:1px solid var(--line);color:#dbe0eb;border-radius:30px;padding:8px 14px;white-space:nowrap}.chip.active{background:#fff;color:#10131b}
+.section-head{display:flex;align-items:end;justify-content:space-between;margin:24px 0 13px}.section-head h2{margin:0;font-size:21px}.hint{color:var(--muted);font-size:12px}
+.grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:15px}
+.card{min-width:0;cursor:pointer}.poster{aspect-ratio:2/3;border-radius:12px;padding:13px;display:flex;flex-direction:column;justify-content:space-between;position:relative;overflow:hidden;box-shadow:0 8px 22px #0005;transition:transform .18s}.card:hover .poster{transform:translateY(-4px)}
+.poster:before{content:"";position:absolute;inset:0;background:linear-gradient(180deg,#0001,#000a)}.poster>*{position:relative}.poster .tag{font-size:10px;letter-spacing:1.4px;text-transform:uppercase;font-weight:800}.poster .poster-title{font-size:clamp(17px,2.2vw,25px);font-weight:950;line-height:.98;text-transform:uppercase;text-shadow:0 2px 8px #0008}.poster .year{font-size:11px;color:#eee}
+.card h3{font-size:14px;margin:9px 0 2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.card small{color:var(--muted)}
+.empty{color:var(--muted);padding:25px 0}
+footer{border-top:1px solid var(--line);color:var(--muted);font-size:12px;padding:20px;text-align:center}
+.modal{position:fixed;inset:0;background:#000c;z-index:10;display:none;align-items:center;justify-content:center;padding:16px}.modal.show{display:flex}.dialog{width:min(820px,100%);background:#121725;border:1px solid #30394d;border-radius:16px;overflow:hidden;max-height:92vh;overflow:auto}.dialog-head{display:flex;justify-content:space-between;align-items:center;padding:13px 16px;border-bottom:1px solid var(--line)}.close{background:#293144;padding:7px 11px}.dialog-body{padding:18px}.video-wrap{background:#000;border-radius:12px;overflow:hidden;aspect-ratio:16/9;display:grid;place-items:center}.video-wrap video{width:100%;height:100%;background:#000}.notice{background:#20283a;border-radius:10px;padding:12px;color:#cbd3e2;font-size:13px;margin-top:13px}.detail-title{font-size:25px;margin:14px 0 4px}.detail-meta{color:var(--muted);font-size:13px}
+@media(max-width:800px){.grid{grid-template-columns:repeat(3,minmax(0,1fr))}.hero{min-height:250px;padding:22px}}
+#animeArea{margin-top:34px;padding-top:8px;border-top:1px solid var(--line)}#animeGrid .anime-card .poster{padding:0;background:#171d2b}#animeGrid .anime-card img{width:100%;height:100%;object-fit:cover;position:absolute;inset:0}#animeGrid .anime-card .poster:before{z-index:1}#animeGrid .anime-card .poster-title{z-index:2;padding:12px}#animeGrid .anime-card .tag,#animeGrid .anime-card .year{z-index:2;padding:9px}#animeGrid .anime-card .anime-info{font-size:11px;color:var(--muted)}#animeGrid .anime-card .anime-score{color:#ffd166}#animeArea .search{display:flex}#animeArea .search input{min-width:0}.anime-detail-extra a{overflow-wrap:anywhere}#episodePanel h3{font-size:18px}
+@media(max-width:480px){.nav{gap:10px;padding:12px}.logo{font-size:19px}.grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.hero{min-height:260px}.hint{display:none}}
+.search{position:relative}
+.suggest{position:absolute;top:calc(100% + 6px);left:0;right:0;background:#121725;border:1px solid #30394d;border-radius:12px;overflow:hidden;display:none;z-index:20;box-shadow:0 14px 34px #000a;max-height:70vh;overflow-y:auto}
+.suggest.show{display:block}
+.sg-item{display:flex;gap:11px;align-items:center;padding:9px 12px;cursor:pointer;border-bottom:1px solid var(--line)}
+.sg-item:hover{background:#1b2236}
+.sg-item img{width:40px;height:56px;object-fit:cover;border-radius:6px;background:#222a3d;flex:none}
+.sg-item b{display:block;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sg-item small{color:var(--muted)}
+.sg-info{min-width:0}
+.sg-all,.sg-msg{padding:11px 14px;font-size:13px;color:var(--muted)}
+.sg-all{color:#ff7b83;font-weight:700;cursor:pointer}
+#genreChips{display:none}
+</style>
+</head>
+<body>
+<header><div class="nav"><div class="logo">CINE<span>LIVRE</span></div><div class="search"><input id="search" type="search" placeholder="Pesquisar filmes ou animes..." aria-label="Pesquisar filmes ou animes" autocomplete="off"><div class="suggest" id="suggest"></div></div></div></header>
+<main>
+<section class="hero">
+ <div class="hero-content"><div class="eyebrow">Seu cinema gratuito</div><h1>Uma sessão<br>começa aqui.</h1>
+ <p>Descubra obras gratuitas e conteúdos de demonstração. Este catálogo inicial usa títulos de referência; só reproduza obras que estejam liberadas para distribuição.</p>
+ <div class="actions"><button id="featuredPlay">▶ Assistir demonstração</button><button class="secondary" id="browse">Explorar catálogo</button></div></div>
+</section>
+<div class="filters" id="filters">
+ <button class="chip active" data-cat="Todos">Todos</button><button class="chip" data-cat="Animação">Animação</button><button class="chip" data-cat="Aventura">Aventura</button><button class="chip" data-cat="Drama">Drama</button><button class="chip" data-cat="Clássicos">Clássicos</button><button class="chip" data-cat="Animes" id="animeFilter">🍥 Animes</button>
+</div>
+<div class="section-head"><h2 id="sectionTitle">Filmes em destaque</h2><span class="hint" id="count"></span></div>
+<div class="grid" id="grid"></div>
+
+<section id="animeArea">
+ <div class="section-head"><h2>🍥 Catálogo de animes</h2><span class="hint" id="animeCount">Carregando catálogo…</span></div>
+ <p style="color:var(--muted);margin-top:-5px">Pesquise milhares de títulos, incluindo séries, filmes, OVAs e especiais. O catálogo mostra informações e capas; a reprodução depende de onde a obra está licenciada.</p>
+ <div class="filters" id="animeFilters">
+  <button class="chip active" data-anime-mode="popular">Populares</button>
+  <button class="chip" data-anime-mode="movie">Filmes de anime</button>
+  <button class="chip" data-anime-mode="tv">Séries</button>
+  <button class="chip" data-anime-mode="ova">OVAs</button>
+  <button class="chip" data-anime-mode="special">Especiais</button>
+ </div>
+ <div class="filters" id="genreChips">
+  <button class="chip active" data-genre="">Todos os gêneros</button>
+  <button class="chip" data-genre="1">Ação</button><button class="chip" data-genre="2">Aventura</button>
+  <button class="chip" data-genre="4">Comédia</button><button class="chip" data-genre="8">Drama</button>
+  <button class="chip" data-genre="10">Fantasia</button><button class="chip" data-genre="22">Romance</button>
+  <button class="chip" data-genre="24">Ficção científica</button><button class="chip" data-genre="14">Terror</button>
+  <button class="chip" data-genre="7">Mistério</button><button class="chip" data-genre="36">Slice of Life</button>
+  <button class="chip" data-genre="30">Esportes</button><button class="chip" data-genre="37">Sobrenatural</button>
+  <button class="chip" data-genre="46">Premiados</button>
+ </div>
+ <div class="section-head"><h2 id="animeHeading">Animes populares</h2><span class="hint" id="animePage"></span></div>
+ <div class="grid" id="animeGrid"><div class="empty">Carregando animes…</div></div>
+ <div class="actions" style="justify-content:center;margin:22px 0">
+  <button class="secondary" id="animePrev" disabled>← Anterior</button>
+  <button id="animeNext">Mais animes →</button>
+ </div>
+ <div class="notice" id="animeStatus">Digite o nome na barra superior e pressione Enter para pesquisar filmes e animes. O catálogo de animes consulta uma base pública; nem todos os títulos têm opção gratuita de reprodução.</div>
+</section>
+</main>
+<footer>CineLivre • Protótipo demonstrativo. A disponibilidade de filmes depende de direitos de exibição.</footer>
+<div class="modal" id="modal" role="dialog" aria-modal="true" aria-label="Detalhes do filme">
+ <div class="dialog"><div class="dialog-head"><strong id="modalHeading">CineLivre</strong><button class="close" id="close">Fechar ✕</button></div>
+ <div class="dialog-body"><div class="video-wrap"><video id="player" controls playsinline preload="metadata"><source src="https://storage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" type="video/mp4">Seu navegador não suporta vídeo.</video></div>
+ <h2 class="detail-title" id="detailTitle">Demonstração</h2><div class="detail-meta" id="detailMeta">Vídeo de demonstração • Reprodução online</div>
+ <div class="notice" id="detailNotice">Este é um vídeo de demonstração disponibilizado publicamente para testes. Os demais títulos são sugestões de catálogo e ainda não possuem arquivos de vídeo conectados.</div>
+ <div id="episodePanel" class="anime-detail-extra" style="display:none;margin-top:18px">
+  <div class="section-head"><h3 style="margin:0">Temporadas e episódios</h3><span class="hint" id="episodeCount"></span></div>
+  <select id="seasonSelect" style="width:100%;background:#171d2b;color:white;border:1px solid #30394d;border-radius:9px;padding:11px;margin-bottom:12px"></select>
+  <div id="episodeList" style="display:grid;gap:8px"></div>
+  <div class="notice">A lista de episódios vem de uma base informativa. Para assistir, use links de vídeo que você tenha autorização para reproduzir. O CineLivre não fornece episódios protegidos sem licença.</div>
+  <div style="margin-top:14px"><label for="authorizedVideo" style="display:block;color:#cbd3e2;margin-bottom:7px">Link de vídeo autorizado (MP4 ou stream compatível)</label><input id="authorizedVideo" type="url" placeholder="https://exemplo.com/video.mp4"><button id="playAuthorized" style="margin-top:8px">▶ Reproduzir link</button></div>
+ </div>
+ </div></div>
+</div>
+<script>
+const films=[
+ {title:"Big Buck Bunny",year:"2008",cat:"Animação",tag:"Demonstração",desc:"Curta de animação usado como vídeo de demonstração do player.",colors:["#247b83","#143c57"],play:true},
+ {title:"Viagem ao desconhecido",year:"Clássico",cat:"Aventura",tag:"Aventura",desc:"Espaço reservado para uma obra de aventura com direitos liberados.",colors:["#9b542b","#281c42"]},
+ {title:"O mundo em silêncio",year:"Clássico",cat:"Drama",tag:"Drama",desc:"Espaço reservado para um drama de domínio público ou licenciado.",colors:["#596c86","#172033"]},
+ {title:"Noite de mistério",year:"Clássico",cat:"Clássicos",tag:"Mistério",desc:"Espaço reservado para um clássico com distribuição autorizada.",colors:["#563c76","#15172d"]},
+ {title:"Pequenos heróis",year:"Clássico",cat:"Animação",tag:"Família",desc:"Espaço reservado para animações gratuitas autorizadas.",colors:["#c47735","#54305c"]},
+ {title:"Além das montanhas",year:"Clássico",cat:"Aventura",tag:"Aventura",desc:"Espaço reservado para uma obra de aventura de acesso livre.",colors:["#367d64","#1c2b42"]},
+ {title:"Retratos da vida",year:"Clássico",cat:"Drama",tag:"Drama",desc:"Espaço reservado para um filme dramático autorizado.",colors:["#986b54","#322c46"]},
+ {title:"Era uma vez",year:"Clássico",cat:"Clássicos",tag:"Clássico",desc:"Espaço reservado para uma obra clássica em domínio público.",colors:["#a23e46","#2d203d"]}
+];
+let active="Todos";
+const grid=document.getElementById("grid"),search=document.getElementById("search");
+function render(){
+ const q=search.value.trim().toLowerCase();
+ const list=films.filter(f=>(active==="Todos"||f.cat===active)&&(f.title.toLowerCase().includes(q)||f.cat.toLowerCase().includes(q)));
+ document.getElementById("count").textContent=list.length+" títulos";
+ grid.innerHTML=list.length?"":"<div class='empty'>Nenhum título encontrado. Tente outra pesquisa.</div>";
+ list.forEach(f=>{
+  const i=films.indexOf(f),el=document.createElement("article");el.className="card";
+  el.innerHTML=`<div class="poster" style="background:linear-gradient(145deg,${f.colors[0]},${f.colors[1]})"><span class="tag">${f.tag}</span><span class="poster-title">${f.title}</span><span class="year">${f.year}</span></div><h3>${f.title}</h3><small>${f.cat} • ${f.play?"Disponível para teste":"Em breve"}</small>`;
+  el.addEventListener("click",()=>openFilm(i));grid.appendChild(el);
+ });
+}
+function openFilm(i){
+ document.getElementById("episodePanel").style.display="none";
+ const f=films[i],modal=document.getElementById("modal"),player=document.getElementById("player");
+ document.getElementById("modalHeading").textContent=f.title;document.getElementById("detailTitle").textContent=f.title;
+ document.getElementById("detailMeta").textContent=f.year+" • "+f.cat;
+ document.getElementById("detailNotice").textContent=f.play?f.desc+" O vídeo pode levar alguns segundos para carregar.":f.desc+" Adicione um arquivo ou link de vídeo autorizado para habilitar a reprodução.";
+ player.style.display=f.play?"block":"none";if(!f.play){player.pause();player.removeAttribute("src");}else{player.innerHTML='<source src="https://storage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" type="video/mp4">';player.load();}
+ modal.classList.add("show");
+}
+function closeModal(){const p=document.getElementById("player");p.pause();document.getElementById("modal").classList.remove("show");document.getElementById("episodePanel").style.display="none"}
+document.getElementById("close").onclick=closeModal;document.getElementById("modal").addEventListener("click",e=>{if(e.target.id==="modal")closeModal()});
+document.getElementById("featuredPlay").onclick=()=>openFilm(0);
+document.getElementById("browse").onclick=()=>document.getElementById("filters").scrollIntoView({behavior:"smooth"});
+search.addEventListener("input",render);
+document.querySelectorAll("#filters .chip").forEach(b=>b.addEventListener("click",()=>{
+ document.querySelector("#filters .chip.active").classList.remove("active");b.classList.add("active");
+ if(b.dataset.cat==="Animes"){document.getElementById("animeArea").scrollIntoView({behavior:"smooth"});active="Todos";search.value="";render();document.getElementById("sectionTitle").textContent="Filmes em destaque";}
+ else{active=b.dataset.cat;render();document.getElementById("sectionTitle").textContent=active==="Todos"?"Filmes em destaque":active;}
+}));
+render();
+
+// Anime discovery catalogue powered by the public Jikan API (MyAnimeList data).
+const animeGrid=document.getElementById("animeGrid");
+let animeMode="popular", animePageNum=1, animeQuery="", animeBusy=false;
+const animeApi="https://api.jikan.moe/v4";
+function jfetch(url,ms){
+ return Promise.race([fetch(url),new Promise((_,rej)=>setTimeout(()=>rej(new Error("Tempo esgotado ao consultar o catálogo.")),ms||15000))]);
+}
+function safeText(v){return String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
+function setAnimeStatus(msg){document.getElementById("animeStatus").textContent=msg;}
+let animeGenre="";
+function animeEndpoint(){
+ if(animeMode==="movie"&&!animeQuery)return `${animeApi}/anime?type=movie&order_by=members&sort=desc&sfw=true&page=${animePageNum}&limit=20${animeGenre?"&genres="+animeGenre:""}`;
+ if(animeQuery)return `${animeApi}/anime?q=${encodeURIComponent(animeQuery)}&page=${animePageNum}&limit=20&sfw=true`;
+ if(animeMode==="popular")return `${animeApi}/top/anime?page=${animePageNum}&limit=20&filter=bypopularity`;
+ return `${animeApi}/top/anime?page=${animePageNum}&limit=20&type=${encodeURIComponent(animeMode)}&filter=bypopularity`;
+}
+async function loadAnimes(){
+ if(animeBusy){setTimeout(loadAnimes,500);return;}animeBusy=true;
+ animeGrid.innerHTML="<div class='empty'>Buscando títulos no catálogo…</div>";
+ document.getElementById("animeCount").textContent="Consultando catálogo";
+ document.getElementById("animePrev").disabled=animePageNum<=1;
+ try{
+  const response=await jfetch(animeEndpoint(),15000);
+  if(!response.ok) {
+   if(response.status===429) throw new Error("O catálogo recebeu muitas pesquisas ao mesmo tempo. Aguarde alguns segundos e tente novamente.");
+   throw new Error("Não foi possível acessar a base de animes agora. Confira a internet e tente novamente.");
+  }
+  const json=await response.json(), items=json.data||[], pagination=json.pagination||{};
+  document.getElementById("animeCount").textContent=(pagination.items?.total??items.length)+" resultados disponíveis nesta busca";
+  document.getElementById("animePage").textContent="Página "+animePageNum;
+  document.getElementById("animeNext").disabled=!pagination.has_next_page;
+  document.getElementById("animePrev").disabled=animePageNum<=1;
+  if(!items.length){animeGrid.innerHTML="<div class='empty'>Nenhum título encontrado. Tente outro nome.</div>";return;}
+  animeGrid.innerHTML="";
+  items.forEach(a=>{
+   const title=a.title_english||a.title||"Anime";
+   const image=a.images?.jpg?.large_image_url||a.images?.jpg?.image_url||"";
+   const kind=a.type||"Anime", year=a.year||a.aired?.prop?.from?.year||"Ano não informado";
+   const score=a.score?`★ ${a.score}`:"Nota não disponível";
+   const genres=(a.genres||[]).slice(0,2).map(g=>g.name).join(" • ");
+   const card=document.createElement("article");card.className="card anime-card";
+   card.innerHTML=`<div class="poster"><img loading="lazy" src="${safeText(image)}" alt="Capa de ${safeText(title)}" onerror="this.style.display='none'"><span class="tag">${safeText(kind)}</span><span class="year">${safeText(year)}</span></div><h3 title="${safeText(title)}">${safeText(title)}</h3><div class="anime-info"><span class="anime-score">${safeText(score)}</span>${genres?" • "+safeText(genres):""}</div>`;
+   card.addEventListener("click",()=>showAnimeDetails(a));
+   animeGrid.appendChild(card);
+  });
+  setAnimeStatus("Catálogo informativo carregado. Para assistir, confira a disponibilidade legal em serviços oficiais; nem todo anime é gratuito no Brasil.");
+ }catch(err){
+  animeGrid.innerHTML=`<div class='empty'>${safeText(err.message)} Verifique sua conexão e tente novamente.</div>`;
+  document.getElementById("animeCount").textContent="Não foi possível carregar";
+  setAnimeStatus("O catálogo online precisa de conexão com a internet.");
+ }finally{animeBusy=false;}
+}
+function showAnimeDetails(a){
+ const title=a.title_english||a.title||"Anime", synopsis=a.synopsis||"Sinopse não disponível.";
+ const modal=document.getElementById("modal"),player=document.getElementById("player");
+ player.pause();player.style.display="none";
+ document.getElementById("modalHeading").textContent=title;
+ document.getElementById("detailTitle").textContent=title;
+ document.getElementById("detailMeta").textContent=[a.type,a.year||a.aired?.prop?.from?.year,a.episodes?`${a.episodes} episódios`:null,a.score?`Nota ${a.score}`:null].filter(Boolean).join(" • ");
+ document.getElementById("detailNotice").innerHTML="";
+ const body=document.querySelector(".dialog-body");
+ let old=body.querySelector(".anime-detail-extra");if(old)old.remove();
+ const extra=document.createElement("div");extra.className="anime-detail-extra";
+ const p=document.createElement("p");p.style.color="#cbd3e2";p.textContent=synopsis;extra.appendChild(p);
+ const actions=document.createElement("div");actions.className="actions";
+ const official=document.createElement("a");official.href="https://www.justwatch.com/br/busca?q="+encodeURIComponent(title);official.target="_blank";official.rel="noopener";official.textContent="Onde assistir legalmente";official.style.cssText="display:inline-block;background:#e50914;color:white;padding:11px 15px;border-radius:9px;text-decoration:none;font-weight:750";
+ const mal=document.createElement("a");mal.href=a.url||"https://myanimelist.net";mal.target="_blank";mal.rel="noopener";mal.textContent="Ver ficha completa";mal.style.cssText="display:inline-block;background:#293144;color:white;padding:11px 15px;border-radius:9px;text-decoration:none;font-weight:750";
+ actions.append(official,mal);extra.appendChild(actions);
+ const note=document.createElement("div");note.className="notice";note.textContent="O catálogo exibe dados e capas. Este app não hospeda episódios nem desbloqueia conteúdo pago; a disponibilidade depende dos serviços e licenças.";extra.appendChild(note);
+ body.appendChild(extra);
+ const panel=document.getElementById("episodePanel");panel.style.display="block";
+ const seasonSelect=document.getElementById("seasonSelect");seasonSelect.innerHTML="";
+ const seasonOption=document.createElement("option");seasonOption.value="1";seasonOption.textContent="Temporada 1";seasonSelect.appendChild(seasonOption);
+ document.getElementById("episodeList").innerHTML="<div class='empty'>Carregando episódios…</div>";
+ document.getElementById("episodeCount").textContent="";
+ loadAnimeEpisodes(a.mal_id,1);
+ seasonSelect.onchange=()=>loadAnimeEpisodes(a.mal_id,Number(seasonSelect.value));
+ document.getElementById("playAuthorized").onclick=()=>{
+  const url=document.getElementById("authorizedVideo").value.trim();
+  try{
+   const parsed=new URL(url);
+   if(!["https:","http:"].includes(parsed.protocol))throw new Error();
+   const video=document.getElementById("player");video.style.display="block";video.src=parsed.href;video.load();video.play().catch(()=>{});
+  }catch(e){setAnimeStatus("Informe um link HTTP ou HTTPS válido e autorizado.");}
+ };
+ modal.classList.add("show");
+}
+async function loadAnimeEpisodes(malId,page){
+ const list=document.getElementById("episodeList");
+ list.innerHTML="<div class='empty'>Carregando episódios…</div>";
+ try{
+  const res=await fetch(`${animeApi}/anime/${malId}/episodes?page=${page}`);
+  if(!res.ok)throw new Error();
+  const data=await res.json(),eps=data.data||[];
+  document.getElementById("episodeCount").textContent=eps.length+" episódios nesta página";
+  list.innerHTML="";
+  if(!eps.length){list.innerHTML="<div class='empty'>A base não retornou episódios para este título.</div>";return;}
+  eps.forEach(ep=>{
+   const row=document.createElement("div");row.style.cssText="background:#1a2130;border:1px solid #30394d;border-radius:10px;padding:11px;display:flex;align-items:center;gap:10px;flex-wrap:wrap";
+   const info=document.createElement("div");info.style.flex="1";
+   const name=document.createElement("strong");name.textContent=`Episódio ${ep.mal_id?ep.mal_id:""}: ${ep.title||"Sem título"}`;
+   const sub=document.createElement("div");sub.style.cssText="color:#aab2c3;font-size:12px";sub.textContent=ep.aired?new Date(ep.aired).toLocaleDateString("pt-BR"):"Data não informada";
+   info.append(name,sub);
+   const link=document.createElement("a");link.href="https://www.justwatch.com/br/busca?q="+encodeURIComponent(document.getElementById("detailTitle").textContent);link.target="_blank";link.rel="noopener";link.textContent="Onde assistir";link.style.cssText="color:#ff7b83;font-weight:700;text-decoration:none";
+   row.append(info,link);list.appendChild(row);
+  });
+  if(data.pagination?.has_next_page){
+   const more=document.createElement("button");more.className="secondary";more.textContent="Carregar mais episódios";more.onclick=()=>loadAnimeEpisodes(malId,page+1);list.appendChild(more);
+  }
+ }catch(e){list.innerHTML="<div class='empty'>Não foi possível carregar episódios agora. Tente novamente mais tarde.</div>";}
+}
+function setAnimeMode(mode){
+ animeMode=mode;animeQuery="";animeGenre="";animePageNum=1;
+ document.getElementById("genreChips").style.display=mode==="movie"?"flex":"none";
+ document.querySelectorAll("#genreChips .chip").forEach(b=>b.classList.toggle("active",b.dataset.genre===""));
+ document.querySelectorAll("#animeFilters .chip").forEach(b=>b.classList.toggle("active",b.dataset.animeMode===mode));
+ const labels={popular:"Animes populares",movie:"Filmes de anime",tv:"Séries de anime",ova:"OVAs",special:"Especiais"};
+ document.getElementById("animeHeading").textContent=labels[mode]||"Animes";
+ loadAnimes();
+}
+document.querySelectorAll("#animeFilters .chip").forEach(b=>b.addEventListener("click",()=>setAnimeMode(b.dataset.animeMode)));
+function searchAllCatalogs(){
+ const term=search.value.trim();
+ render();
+ if(!term){
+  animeQuery="";animePageNum=1;
+  document.getElementById("animeHeading").textContent="Animes populares";
+  loadAnimes();
+  return;
+ }
+ animeQuery=term;
+ animePageNum=1;
+ document.querySelectorAll("#animeFilters .chip").forEach(b=>b.classList.remove("active"));
+ document.getElementById("animeHeading").textContent=`Resultados de animes: ${term}`;
+ document.getElementById("animeArea").scrollIntoView({behavior:"smooth",block:"start"});
+ loadAnimes();
+}
+search.addEventListener("keydown",e=>{if(e.key==="Enter")searchAllCatalogs()});
+document.getElementById("animeNext").onclick=()=>{animePageNum++;loadAnimes();document.getElementById("animeArea").scrollIntoView({behavior:"smooth"})};
+document.getElementById("animePrev").onclick=()=>{if(animePageNum>1){animePageNum--;loadAnimes()}};
+
+document.querySelectorAll("#genreChips .chip").forEach(b=>b.addEventListener("click",()=>{
+ animeGenre=b.dataset.genre;animePageNum=1;animeQuery="";
+ document.querySelectorAll("#genreChips .chip").forEach(x=>x.classList.toggle("active",x===b));
+ document.getElementById("animeHeading").textContent="Filmes de anime"+(animeGenre?": "+b.textContent:"");
+ loadAnimes();
+}));
+
+// Live suggestions while typing
+const suggest=document.getElementById("suggest");
+let sgTimer=null,sgId=0;
+function hideSuggest(){suggest.classList.remove("show");suggest.innerHTML=""}
+function showSuggestMsg(t){suggest.innerHTML="";const d=document.createElement("div");d.className="sg-msg";d.textContent=t;suggest.appendChild(d);suggest.classList.add("show")}
+async function fetchSuggest(term){
+ const myId=++sgId;
+ showSuggestMsg("Buscando…");
+ try{
+  const r=await jfetch(`${animeApi}/anime?q=${encodeURIComponent(term)}&limit=8&sfw=true&order_by=members&sort=desc`,12000);
+  if(!r.ok)throw new Error(r.status);
+  const items=(await r.json()).data||[];
+  if(myId!==sgId||search.value.trim()!==term)return;
+  if(!items.length){showSuggestMsg("Nenhum anime encontrado.");return}
+  suggest.innerHTML="";
+  items.forEach(a=>{
+   const title=a.title_english||a.title||"Anime";
+   const img=a.images?.jpg?.small_image_url||a.images?.jpg?.image_url||"";
+   const row=document.createElement("div");row.className="sg-item";
+   const im=document.createElement("img");im.src=img;im.alt="";im.loading="lazy";im.onerror=()=>{im.style.visibility="hidden"};
+   const box=document.createElement("div");box.className="sg-info";
+   const b=document.createElement("b");b.textContent=title;
+   const sm=document.createElement("small");sm.textContent=[a.type,a.year||a.aired?.prop?.from?.year,a.score?"★ "+a.score:null].filter(Boolean).join(" • ");
+   box.append(b,sm);row.append(im,box);
+   row.addEventListener("click",()=>{hideSuggest();showAnimeDetails(a)});
+   suggest.appendChild(row);
+  });
+  const all=document.createElement("div");all.className="sg-all";all.textContent="Ver todos os resultados de “"+term+"”";
+  all.addEventListener("click",()=>{hideSuggest();searchAllCatalogs()});
+  suggest.appendChild(all);suggest.classList.add("show");
+ }catch(e){if(myId===sgId)showSuggestMsg("Não foi possível buscar agora. Tente de novo em instantes.")}
+}
+search.addEventListener("input",()=>{
+ clearTimeout(sgTimer);const term=search.value.trim();
+ if(term.length<2){sgId++;hideSuggest();return}
+ sgTimer=setTimeout(()=>fetchSuggest(term),450);
+});
+search.addEventListener("keydown",e=>{if(e.key==="Enter"){clearTimeout(sgTimer);sgId++;hideSuggest()}if(e.key==="Escape")hideSuggest()});
+document.addEventListener("click",e=>{if(!e.target.closest(".search"))hideSuggest()});
+loadAnimes();
+</script>
+</body></html>
